@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Create genre
+{% endblock %}
+
+{% block body %}
+<div class="container mt-5 mb-5">
+    <div class="shadow p-3 mb-5 bg-body rounded">
+        <h1>Add genre</h1>
+        <br>
+        <form method="POST">
+            {{ form.hidden_tag() }}
+
+            {{ form.name.label(class='form-label') }}
+            {{ form.name(class='form-control') }}
+            <br>
+            {{ form.submit(class="btn btn-success") }}
+        </form>
+    </div>
+</div>
+{% endblock %}
