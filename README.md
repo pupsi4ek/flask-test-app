@@ -1,2 +1,8 @@
 # flask-test-app
- task for interview
+interview
+
+# install requirements
+pip install -r requirements.txt
+
+# run app with
+flask run
