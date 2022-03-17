@@ -1,5 +1,5 @@
 # flask-test-app
-interview
+interview task
 
 # install requirements
 pip install -r requirements.txt
