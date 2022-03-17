@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block title %}
+{{ book.title }}
+{% endblock %}
+
+{% block body %}
+<div class="container mt-5 mb-5 shadow p-3 bg-body rounded">
+    <h1><b>{{ book.title }}</b></h1>
+    <div class="card-body">
+        <h5>Genre: <b>{{ genres[book.genre-1].name }}</b></h5>
+        <br>
+        <h4>Author: {{ book.author }}</h4>
+        <br>
+        <h4>Description: {{ book.description }}</h4>
+        <br>
+        <h5>Published: {{ book.date.date() }}</h5>
+        <br>
+        <a href="/{{ book.id }}/update" class="btn btn-outline-primary">Edit</a>
+        <a href="/{{ book.id }}/delete" class="btn btn-outline-danger">Delete</a>
+    </div>
+</div>
+{% endblock %}

@@ -1,9 +1,9 @@
 from datetime import datetime
 
-from flask import Flask, render_template, redirect, flash
+from flask import Flask, render_template, redirect, flash, request, url_for
 from flask_sqlalchemy import SQLAlchemy
 
-from forms import BookForm, GenreForm
+from forms import BookForm, GenreForm, SearchForm
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///flask.db'
@@ -17,7 +17,7 @@ class Books(db.Model):
     title = db.Column(db.String(100), nullable=False)
     genre = db.Column(db.Integer, db.ForeignKey('genres.id'), nullable=False)
     author = db.Column(db.String(100), nullable=False)
-    description = db.Column(db.String(300), nullable=False)
+    description = db.Column(db.String(500), nullable=False)
     date = db.Column(db.DateTime, default=datetime.utcnow)
 
     def __repr__(self):
@@ -33,17 +33,25 @@ class Genres(db.Model):
         return '<%r genre>' % self.name
 
 
-@app.route('/')
+@app.route('/', methods=['GET', 'POST'])
 def index():
     books = Books.query.order_by(Books.date.desc()).all()
-    genres = Genres.query.order_by(Genres.name.desc()).all()
-    return render_template('index.html', books=books, genres=genres)
+    genres = Genres.query.all()
+    book_select = request.args.get('book_select') == 'true'
+
+    q = request.args.get('q')
+    if q:
+        books = Books.query.filter(Books.title.contains(q) | Books.genre.contains(q) |
+                                   Books.author.contains(q) | Books.date.contains(q)).order_by(Books.date.desc())
+
+    return render_template('index.html', books=books, genres=genres, book_select=book_select)
 
 
 @app.route('/create-book', methods=['GET', 'POST'])
 def createBook():
     title = None
     description = None
+    author = None
     form = BookForm()
     form.genre.choices = [(g.id, g.name) for g in Genres.query.order_by('name')]
 
@@ -67,6 +75,44 @@ def createBook():
             flash('Book already exists!')
 
     return render_template('create-book.html', title=title, form=form)
+
+
+@app.route('/<int:id>')
+def book_info(id):
+    book = Books.query.get_or_404(id)
+    genres = Genres.query.all()
+    return render_template('book_info.html', book=book, genres=genres)
+
+
+@app.route('/<int:id>/delete')
+def book_delete(id):
+    book = Books.query.get_or_404(id)
+
+    try:
+        db.session.delete(book)
+        db.session.commit()
+        flash('Book deleted successfully!')
+        return redirect('/')
+    except:
+        return "It's an error occurred while trying to delete book"
+
+
+@app.route('/<int:id>/update', methods=['GET', 'POST'])
+def book_update(id):
+    book = db.session.query(Books).get_or_404(id)
+    form = BookForm(obj=book)
+    form.genre.choices = [(g.id, g.name) for g in Genres.query.order_by('name')]
+    if form.validate_on_submit():
+        try:
+            form.populate_obj(book)
+            db.session.add(book)
+            db.session.commit()
+            flash('Book updated successfully')
+            return redirect('/')
+        except:
+            return "It's an error occurred while updating book"
+
+    return render_template('book_update.html', form=form)
 
 
 @app.route('/create-genre', methods=['GET', 'POST'])

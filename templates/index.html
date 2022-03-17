@@ -1,31 +1,46 @@
 {% extends 'base.html' %}
 
 {% block title %}
-Books
+Home page
 {% endblock %}
 
 {% block body %}
 <div class="container mt-5 mb-5">
-    <h1>Books list</h1>
+    <div class="row mb-3">
+        {% if book_select %}
+        <h1 class="col-3">Genres list</h1>
+        <a href="?book_select=false" class="col-2 pt-2"><button class="btn btn-outline-primary">Books</button></a>
+        {% else %}
+        <h1 class="col-3">Books list</h1>
+        <a href="?book_select=true" class="col-2 pt-2"><button class="btn btn-outline-primary">Genres</button></a>
+        {% endif %}
+        <h4 class="col-2 pt-3 offset-md-2">Search</h4>
+        <form class="col d-flex mb-1 mt-1" method="GET">
+            <input type="text" class="form-control me-2" placeholder="Look for..." aria-label="Username"
+               aria-describedby="basic-addon1" name="q">
+            <button type="submit" class="btn btn-outline-success">Search</button>
+        </form>
+    </div>
+    {% if not book_select %}
         <div class="shadow p-3 mb-5 bg-body rounded">
-            {% if books|length > 0 %}
+            {% if books %}
                 <table class="table table-striped table-hover">
                     <tr>
-                        <td>#</td>
-                        <td>Title</td>
-                        <td>Genre</td>
-                        <td>Author</td>
-                        <td>Created</td>
-                        <td></td>
+                        <td class="alert-link">#</td>
+                        <td class="alert-link">Title</td>
+                        <td class="alert-link">Genre</td>
+                        <td class="alert-link">Author</td>
+                        <td class="alert-link">Created</td>
+                        <td class="alert-link"></td>
                     </tr>
                     {% for el in books %}
                     <tr>
                         <td>{{ el.id }}</td>
                         <td>{{ el.title }}</td>
-                        <td>{{ genres.name }}</td>
+                        <td>{{ genres[el.genre-1].name  }}</td>
                         <td>{{ el.author }}</td>
                         <td>{{ el.date.date() }}</td>
-                        <td><a href="/{{ el.id }}" class="btn btn-warning">Details</a></td>
+                        <td><a href="/{{ el.id }}" class="btn btn-secondary">Details</a></td>
                     </tr>
                     {% endfor %}
                 </table>
@@ -33,5 +48,25 @@ Books
                 <p>There is no books yet :(</p>
             {% endif %}
         </div>
+    {% else %}
+        <div class="shadow p-3 mb-5 bg-body rounded">
+            {% if genres|length > 0 %}
+                <table class="table table-striped table-hover">
+                    <tr>
+                        <td class="alert-link">#</td>
+                        <td class="alert-link">Genre</td>
+                    </tr>
+                    {% for el in genres %}
+                    <tr>
+                        <td>{{ el.id }}</td>
+                        <td>{{ el.name }}</td>
+                    </tr>
+                    {% endfor %}
+                </table>
+            {% else %}
+                <p>There is no books yet :(</p>
+            {% endif %}
+        </div>
+    {% endif %}
 </div>
 {% endblock %}
